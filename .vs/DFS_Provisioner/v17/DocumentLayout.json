@@ -1,0 +1,326 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\study\\C#\\DFS_Provisioner\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\dfs_provisioner.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\dfs_provisioner.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\services\\ntfsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\services\\ntfsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\viewmodels\\mainviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\services\\adservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\services\\adservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\models\\defaultconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\models\\defaultconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\services\\shareservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\services\\shareservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\services\\configservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\services\\configservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\viewmodels\\relaycommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\viewmodels\\relaycommand.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\2.json||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\2.json||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\config.json||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\config.json||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\assemblyinfo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\services\\dfsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\services\\dfsservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Marchenko_AA\\AppData\\Local\\Temp\\.vsdbgsrc\\7359755a63a0eef4e8a101bde875a0a6c6013760bb23441bb9b04a92876a282b\\ExecutionContext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|d:\\study\\c#\\dfs_provisioner\\dfs_provisioner\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AF3348CB-0C1D-45D6-A4AB-C300C3330DBF}|DFS_Provisioner\\DFS_Provisioner.csproj|solutionrelative:dfs_provisioner\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 1,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedHeight": 328,
+          "SelectedChildIndex": 5,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "2.json",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\2.json",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\2.json",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\2.json",
+              "RelativeToolTip": "DFS_Provisioner\\2.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAABCAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-27T11:53:52.747Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "AssemblyInfo.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\AssemblyInfo.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\AssemblyInfo.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\AssemblyInfo.cs",
+              "RelativeToolTip": "DFS_Provisioner\\AssemblyInfo.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T11:42:48.59Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "ExecutionContext.cs",
+              "DocumentMoniker": "C:\\Users\\Marchenko_AA\\AppData\\Local\\Temp\\.vsdbgsrc\\7359755a63a0eef4e8a101bde875a0a6c6013760bb23441bb9b04a92876a282b\\ExecutionContext.cs",
+              "ToolTip": "C:\\Users\\Marchenko_AA\\AppData\\Local\\Temp\\.vsdbgsrc\\7359755a63a0eef4e8a101bde875a0a6c6013760bb23441bb9b04a92876a282b\\ExecutionContext.cs [Read Only]",
+              "ViewState": "AgIAAHAAAAAAAAAAAAAswHMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:58:51.044Z",
+              "EditorCaption": " [Read Only]"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "config.json",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\config.json",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\config.json",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\config.json",
+              "RelativeToolTip": "DFS_Provisioner\\config.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-04-27T09:50:55.402Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "DFS_Provisioner",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\DFS_Provisioner.csproj",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\DFS_Provisioner.csproj",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\DFS_Provisioner.csproj",
+              "RelativeToolTip": "DFS_Provisioner\\DFS_Provisioner.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-04-27T09:43:36.234Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RelayCommand.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\ViewModels\\RelayCommand.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\ViewModels\\RelayCommand.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\ViewModels\\RelayCommand.cs",
+              "RelativeToolTip": "DFS_Provisioner\\ViewModels\\RelayCommand.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:23:40.806Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainViewModel.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\ViewModels\\MainViewModel.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\ViewModels\\MainViewModel.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\ViewModels\\MainViewModel.cs",
+              "RelativeToolTip": "DFS_Provisioner\\ViewModels\\MainViewModel.cs",
+              "ViewState": "AgIAAEgBAAAAAAAAAAAAwGcBAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:23:33.357Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "DFsService.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\DFsService.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Services\\DFsService.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\DFsService.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Services\\DFsService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:22:54.35Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "NTFsService.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\NTFsService.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Services\\NTFsService.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\NTFsService.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Services\\NTFsService.cs",
+              "ViewState": "AgIAAEMAAAAAAAAAAAA9wFIAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:22:45.28Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ShareService.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\ShareService.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Services\\ShareService.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\ShareService.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Services\\ShareService.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAwwDwAAABAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:22:25.801Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AdService.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\AdService.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Services\\AdService.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\AdService.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Services\\AdService.cs",
+              "ViewState": "AgIAABsAAAAAAAAAAAAowC4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:22:17.188Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "ConfigService.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\ConfigService.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Services\\ConfigService.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Services\\ConfigService.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Services\\ConfigService.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAAUAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:22:06.992Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "DefaultConfig.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Models\\DefaultConfig.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\Models\\DefaultConfig.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\Models\\DefaultConfig.cs",
+              "RelativeToolTip": "DFS_Provisioner\\Models\\DefaultConfig.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAcwBgAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:21:30.892Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\App.xaml.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\App.xaml.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\App.xaml.cs",
+              "RelativeToolTip": "DFS_Provisioner\\App.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T09:19:57.458Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "App.xaml",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\App.xaml",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\App.xaml",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\App.xaml",
+              "RelativeToolTip": "DFS_Provisioner\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-27T09:19:55.238Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\MainWindow.xaml",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\MainWindow.xaml",
+              "RelativeToolTip": "DFS_Provisioner\\MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2026-04-27T08:48:08.028Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "DFS_Provisioner\\MainWindow.xaml.cs",
+              "ToolTip": "D:\\study\\C#\\DFS_Provisioner\\DFS_Provisioner\\MainWindow.xaml.cs",
+              "RelativeToolTip": "DFS_Provisioner\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-04-27T08:48:05.118Z",
+              "EditorCaption": ""
+            }
+          ]
+        },
+        {
+          "DockedHeight": 72,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{a80febb4-e7e0-4147-b476-21aaf2453969}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

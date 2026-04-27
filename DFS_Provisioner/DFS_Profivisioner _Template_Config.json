@@ -1,0 +1,32 @@
+{
+  "Credentials": {
+    "AdUsername": "domain\\user",
+    "ServerUsername": "User"
+  },
+  "ActiveDirectory": {
+    "Domain": "some.domain.com",
+    "GroupsOU": "OU=someOu,DC=some,DC=domain,DC=com",
+    "GroupNamePrefix": "PRE_",
+    "ReadGroupSuffix": "_Read",
+    "WriteGroupSuffix": "_Write",
+    "ReadGroupName": "",
+    "WriteGroupName": "",
+    "GroupDescriptionTemplate": "{ShareName} {AccessType} access",
+    "GroupNotesTemplate": "Created by DFS Provisioner on {Date}"
+  },
+  "Share": {
+    "Server": "Server-Name",
+    "LocalPath": "c:\\temp",
+    "OwnerAccount": "uk\\SomeUser"
+  },
+  "Dfs": {
+    "NamespaceServer": "dfs01.contoso.com",
+    "NamespaceRoot": "\\\\contoso.com\\DFSroot",
+    "LinkNameTemplate": "{ShareName}",
+    "FolderTargetPathTemplate": "\\\\{Server}\\{ShareName}"
+  },
+  "Options": {
+    "RemoveEveryoneFromNTFS": true,
+    "ADReplicationWaitSeconds": 5
+  }
+}

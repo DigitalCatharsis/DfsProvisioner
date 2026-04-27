@@ -1,0 +1,34 @@
+﻿<Application x:Class="DFS_Provisioner.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:DFS_Provisioner"
+             StartupUri="MainWindow.xaml">
+<Application.Resources>
+        <!-- TextBox style with validation -->
+        <Style x:Key="ValidatedTextBox" TargetType="TextBox">
+            <Setter Property="Validation.ErrorTemplate">
+                <Setter.Value>
+                    <ControlTemplate>
+                        <DockPanel>
+                            <Border BorderBrush="Red" BorderThickness="2" CornerRadius="2">
+                                <AdornedElementPlaceholder/>
+                            </Border>
+                        </DockPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" 
+                            Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- PasswordBox style (basic) -->
+        <Style x:Key="PasswordBoxStyle" TargetType="PasswordBox">
+            <Setter Property="MinWidth" Value="150"/>
+            <Setter Property="Padding" Value="2"/>
+        </Style>
+    </Application.Resources>
+</Application>
