@@ -1,108 +1,68 @@
-﻿using System.Management;
-using System.Net;
-using System.Security;
+﻿using System;
+using System.Diagnostics;
+using System.Text;
 
 namespace DFS_Provisioner.Services
 {
     public static class DfsService
     {
-        // Checks if a DFS link exists using WMI query against Win32_DFSNode
-        public static bool DfsLinkExists(string namespaceServer, string namespaceRoot, string linkName,
-                                         string username, SecureString password)
+        public static bool DfsLinkExists(string namespaceRoot, string linkName)
         {
-            try
-            {
-                var scope = GetManagementScope(namespaceServer, username, password);
-                // Search for a node with the specific combined path
-                var query = new ObjectQuery(
-                    $"SELECT * FROM Win32_DFSNode WHERE Path = '{namespaceRoot}\\{linkName}'");
-                var searcher = new ManagementObjectSearcher(scope, query);
-                return searcher.Get().Count > 0;
-            }
-            catch
-            {
-                return false;
-            }
+            string path = $@"{namespaceRoot}\{linkName}";
+            // Проверяем через Get-DfsnFolder. Если папка найдена – выводим EXISTS.
+            string script = $"if (Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue) {{ 'EXISTS' }} else {{ 'NOT_FOUND' }}";
+            string result = RunPowerShell(script);
+            return result?.Contains("EXISTS") == true;
         }
 
-        // Creates a DFS link and assigns a physical target folder to it
-        public static void CreateDfsLink(string namespaceServer, string namespaceRoot, string linkName,
-                                         string folderTargetPath, string description,
-                                         string username, SecureString password)
+        public static void CreateDfsLink(string namespaceRoot, string linkName,
+                                         string folderTargetPath, string description)
         {
-            var scope = GetManagementScope(namespaceServer, username, password);
+            string path = $@"{namespaceRoot}\{linkName}";
 
-            // Find the specific DFS Namespace instance to perform actions on it
-            var nsClass = new ManagementClass(scope, new ManagementPath("Win32_DFSNamespace"), null);
-            var nsObjects = nsClass.GetInstances();
-            ManagementObject nsObject = null;
-            foreach (ManagementObject obj in nsObjects)
-            {
-                if (obj["Path"]?.ToString().Equals(namespaceRoot, StringComparison.OrdinalIgnoreCase) == true)
-                {
-                    nsObject = obj;
-                    break;
-                }
-            }
-
-            if (nsObject == null)
-                throw new Exception($"DFS namespace not found: {namespaceRoot}");
-
-            // Step 1: Create the DFS folder (the logical entry in the namespace)
-            var inParams = nsObject.GetMethodParameters("AddFolder");
-            inParams["Path"] = linkName;
-            inParams["Description"] = description;
-            var outParams = nsObject.InvokeMethod("AddFolder", inParams, null);
-            uint returnValue = (uint)outParams["ReturnValue"];
-
-            // Error code 183 means the folder already exists, which we might ignore
-            if (returnValue != 0 && returnValue != 183)
-                throw new Exception($"Failed to create DFS link. Return code: {returnValue}");
-
-            // Step 2: Add a target (physical share) to the newly created DFS folder
-            var folderObject = GetDfsFolder(scope, $"{namespaceRoot}\\{linkName}");
-            var targetParams = folderObject.GetMethodParameters("AddTarget");
-            targetParams["EntryPath"] = folderTargetPath;
-            targetParams["Priority"] = 1; // Sets target priority within the referral list
-            var targetOut = folderObject.InvokeMethod("AddTarget", targetParams, null);
-            uint targetReturn = (uint)targetOut["ReturnValue"];
-
-            if (targetReturn != 0)
-                throw new Exception($"Failed to add DFS target. Return code: {targetReturn}");
+            // Создаём ссылку вместе с целевой папкой (аналог вашей успешной команды)
+            string script = $@"
+                $existing = Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue
+                if (-not $existing) {{
+                    New-DfsnFolder -Path '{path}' -TargetPath '{folderTargetPath}' -Description '{description}'
+                    Write-Output 'DFS link created.'
+                }} else {{
+                    # Проверяем, есть ли такая цель
+                    $targets = Get-DfsnFolderTarget -Path '{path}'
+                    if (-not ($targets | Where-Object {{ $_.TargetPath -eq '{folderTargetPath}' }})) {{
+                        New-DfsnFolderTarget -Path '{path}' -TargetPath '{folderTargetPath}'
+                        Write-Output 'Target added.'
+                    }}
+                }}
+            ";
+            RunPowerShell(script);
         }
 
-        // Configures connection to the MicrosoftDFS WMI namespace
-        private static ManagementScope GetManagementScope(string server, string username, SecureString password)
+        private static string RunPowerShell(string script)
         {
-            var options = new ConnectionOptions
+            var startInfo = new ProcessStartInfo
             {
-                Username = username,
-                Password = ToPlainString(password),
-                Authentication = AuthenticationLevel.PacketPrivacy // Encryption is required for DFS WMI
+                FileName = "powershell.exe",
+                Arguments = $"-NoProfile -NonInteractive -Command \"{script}\"",
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                StandardErrorEncoding = Encoding.UTF8,
             };
-            // Target the specific DFS management namespace
-            var scope = new ManagementScope($@"\\{server}\root\MicrosoftDFS", options);
-            scope.Connect();
-            return scope;
-        }
 
-        // Helper to retrieve a ManagementObject for a specific DFS node
-        private static ManagementObject GetDfsFolder(ManagementScope scope, string fullPath)
-        {
-            var query = new ObjectQuery($"SELECT * FROM Win32_DFSNode WHERE Path = '{fullPath}'");
-            var searcher = new ManagementObjectSearcher(scope, query);
-            var result = searcher.Get();
-            if (result.Count == 0)
-                throw new Exception($"DFS folder not found: {fullPath}");
+            using (var process = new Process { StartInfo = startInfo })
+            {
+                process.Start();
+                string output = process.StandardOutput.ReadToEnd();
+                string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
 
-            var enumerator = result.GetEnumerator();
-            enumerator.MoveNext();
-            return (ManagementObject)enumerator.Current;
-        }
-
-        private static string ToPlainString(SecureString secure)
-        {
-            return new NetworkCredential(string.Empty, secure).Password;
+                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
+                    throw new Exception($"PowerShell error: {error}");
+                return output;
+            }
         }
     }
 }

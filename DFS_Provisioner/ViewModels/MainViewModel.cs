@@ -4,7 +4,9 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Windows.Input;
+using Newtonsoft.Json;
 using DFS_Provisioner.Models;
 using DFS_Provisioner.Services;
 
@@ -12,12 +14,12 @@ namespace DFS_Provisioner.ViewModels
 {
     public class MainViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
-        // ---------- Private fields ----------
         private string _configFilePath = "appsettings.json";
         private string _domainName;
         private string _adUsername;
         private string _serverUsername;
         private string _groupsOU;
+        private string _groupNamePrefix;
         private string _readGroupSuffix;
         private string _writeGroupSuffix;
         private string _groupDescriptionTemplate;
@@ -33,46 +35,31 @@ namespace DFS_Provisioner.ViewModels
         private string _readGroupName;
         private string _writeGroupName;
 
-        private string _groupNamePrefix;
-        // ---------- Public properties ----------
         public string ConfigFilePath { get => _configFilePath; set { _configFilePath = value; OnPropertyChanged(); } }
         public string DomainName { get => _domainName; set { _domainName = value; OnPropertyChanged(); } }
         public string AdUsername { get => _adUsername; set { _adUsername = value; OnPropertyChanged(); } }
         public string ServerUsername { get => _serverUsername; set { _serverUsername = value; OnPropertyChanged(); } }
         public string GroupsOU { get => _groupsOU; set { _groupsOU = value; OnPropertyChanged(); } }
+        public string GroupNamePrefix { get => _groupNamePrefix; set { _groupNamePrefix = value; OnPropertyChanged(); } }
         public string ReadGroupSuffix { get => _readGroupSuffix; set { _readGroupSuffix = value; OnPropertyChanged(); } }
         public string WriteGroupSuffix { get => _writeGroupSuffix; set { _writeGroupSuffix = value; OnPropertyChanged(); } }
         public string GroupDescriptionTemplate { get => _groupDescriptionTemplate; set { _groupDescriptionTemplate = value; OnPropertyChanged(); } }
         public string GroupNotesTemplate { get => _groupNotesTemplate; set { _groupNotesTemplate = value; OnPropertyChanged(); } }
-
-        public string GroupNamePrefix
-        {
-            get => _groupNamePrefix;
-            set { _groupNamePrefix = value; OnPropertyChanged(); }
-        }
-
         public string ShareServer { get => _shareServer; set { _shareServer = value; OnPropertyChanged(); } }
-
         public string LocalPath
         {
             get => _localPath;
             set { _localPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareFolderName)); }
         }
-
         public string OwnerAccount { get => _ownerAccount; set { _ownerAccount = value; OnPropertyChanged(); } }
         public bool RemoveEveryone { get => _removeEveryone; set { _removeEveryone = value; OnPropertyChanged(); } }
-
         public string DfsServer { get => _dfsServer; set { _dfsServer = value; OnPropertyChanged(); } }
         public string NamespaceRoot { get => _namespaceRoot; set { _namespaceRoot = value; OnPropertyChanged(); } }
         public string LinkNameTemplate { get => _linkNameTemplate; set { _linkNameTemplate = value; OnPropertyChanged(); } }
         public string FolderTargetPathTemplate { get => _folderTargetPathTemplate; set { _folderTargetPathTemplate = value; OnPropertyChanged(); } }
-
-
-        // Editable group names
         public string ReadGroupName { get => _readGroupName; set { _readGroupName = value; OnPropertyChanged(); } }
         public string WriteGroupName { get => _writeGroupName; set { _writeGroupName = value; OnPropertyChanged(); } }
 
-        // Computed
         public string ShareFolderName
         {
             get
@@ -82,11 +69,9 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
-        // Secure passwords
         public SecureString AdPassword { get; set; }
         public SecureString ServerPassword { get; set; }
 
-        // Validation
         public string this[string columnName]
         {
             get
@@ -95,9 +80,8 @@ namespace DFS_Provisioner.ViewModels
                 {
                     if (string.IsNullOrWhiteSpace(LocalPath))
                         return "Local path cannot be empty";
-                    // basic check: must have a valid root and share folder name
                     var folder = ShareFolderName;
-                    if (folder.Length == 0 || folder.IndexOfAny(System.IO.Path.GetInvalidFileNameChars()) >= 0)
+                    if (folder.Length == 0 || folder.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                         return "Invalid folder name in path";
                 }
                 return null;
@@ -105,7 +89,6 @@ namespace DFS_Provisioner.ViewModels
         }
         public string Error => null;
 
-        // Commands
         public ICommand LoadConfigCommand { get; }
         public ICommand SaveConfigCommand { get; }
         public ICommand CheckAllCommand { get; }
@@ -133,12 +116,14 @@ namespace DFS_Provisioner.ViewModels
         {
             try
             {
-                var config = ConfigService.LoadConfig(ConfigFilePath);
+                if (!File.Exists(ConfigFilePath)) return;
+                var config = JsonConvert.DeserializeObject<DefaultConfig>(File.ReadAllText(ConfigFilePath));
                 ApplyConfig(config);
+                Log("Configuration loaded.");
             }
             catch (Exception ex)
             {
-                Log($"Configuration not loaded: {ex.Message}", true);
+                Log($"Configuration not loaded: {ex.Message}. Fill fields manually.", true);
             }
         }
 
@@ -150,7 +135,7 @@ namespace DFS_Provisioner.ViewModels
                 ConfigFilePath = dlg.FileName;
                 try
                 {
-                    var config = ConfigService.LoadConfig(ConfigFilePath);
+                    var config = JsonConvert.DeserializeObject<DefaultConfig>(File.ReadAllText(ConfigFilePath));
                     ApplyConfig(config);
                     Log("Configuration loaded.");
                 }
@@ -170,8 +155,8 @@ namespace DFS_Provisioner.ViewModels
                     GroupNamePrefix = GroupNamePrefix,
                     ReadGroupSuffix = ReadGroupSuffix,
                     WriteGroupSuffix = WriteGroupSuffix,
-                    ReadGroupName = ReadGroupName, 
-                    WriteGroupName = WriteGroupName, 
+                    ReadGroupName = ReadGroupName,
+                    WriteGroupName = WriteGroupName,
                     GroupDescriptionTemplate = GroupDescriptionTemplate,
                     GroupNotesTemplate = GroupNotesTemplate
                 },
@@ -188,7 +173,11 @@ namespace DFS_Provisioner.ViewModels
             var dlg = new Microsoft.Win32.SaveFileDialog { Filter = "JSON|*.json" };
             if (dlg.ShowDialog() == true)
             {
-                try { ConfigService.SaveConfig(dlg.FileName, config); Log("Saved."); }
+                try
+                {
+                    File.WriteAllText(dlg.FileName, JsonConvert.SerializeObject(config, Formatting.Indented));
+                    Log("Saved.");
+                }
                 catch (Exception ex) { Log($"Save error: {ex.Message}", true); }
             }
         }
@@ -212,7 +201,6 @@ namespace DFS_Provisioner.ViewModels
                 GroupNotesTemplate = config.ActiveDirectory.GroupNotesTemplate ?? "";
 
                 var folderName = string.IsNullOrWhiteSpace(LocalPath) ? "MyShare" : ShareFolderName;
-                // use saved names if they are not null, else generate
                 ReadGroupName = !string.IsNullOrWhiteSpace(config.ActiveDirectory.ReadGroupName)
                     ? config.ActiveDirectory.ReadGroupName
                     : $"{GroupNamePrefix}{folderName}{ReadGroupSuffix}";
@@ -220,7 +208,6 @@ namespace DFS_Provisioner.ViewModels
                     ? config.ActiveDirectory.WriteGroupName
                     : $"{GroupNamePrefix}{folderName}{WriteGroupSuffix}";
             }
-
             if (config.Share != null)
             {
                 ShareServer = config.Share.Server ?? "";
@@ -246,50 +233,43 @@ namespace DFS_Provisioner.ViewModels
             var pathError = this[nameof(LocalPath)];
             if (!string.IsNullOrEmpty(pathError)) { Log(pathError, true); return; }
 
-            var ok = true;
-
-            // Server connection
             try
             {
                 if (!ShareService.TestServerConnection(ShareServer, ServerUsername, ServerPassword))
-                { Log("Server connection failed.", true); ok = false; }
+                    Log("Server connection failed.", true);
                 else Log("Server connection OK.");
             }
-            catch (Exception ex) { Log($"Server check error: {ex.Message}", true); ok = false; }
+            catch (Exception ex) { Log($"Server check error: {ex.Message}", true); }
 
-            // AD groups
             try
             {
                 if (AdService.GroupExists(DomainName, ReadGroupName, AdUsername, AdPassword))
-                { Log($"Group {ReadGroupName} exists.", true); ok = false; }
+                    Log($"Group {ReadGroupName} exists.", true);
                 else Log($"Group {ReadGroupName} free.");
 
                 if (AdService.GroupExists(DomainName, WriteGroupName, AdUsername, AdPassword))
-                { Log($"Group {WriteGroupName} exists.", true); ok = false; }
+                    Log($"Group {WriteGroupName} exists.", true);
                 else Log($"Group {WriteGroupName} free.");
             }
-            catch (Exception ex) { Log($"AD error: {ex.Message}", true); ok = false; }
+            catch (Exception ex) { Log($"AD error: {ex.Message}", true); }
 
-            // Share
             try
             {
                 if (ShareService.ShareExists(ShareServer, ShareFolderName, ServerUsername, ServerPassword))
-                { Log($"Share {ShareFolderName} exists.", true); ok = false; }
+                    Log($"Share {ShareFolderName} exists.", true);
                 else Log($"Share {ShareFolderName} free.");
             }
-            catch (Exception ex) { Log($"Share check error: {ex.Message}", true); ok = false; }
+            catch (Exception ex) { Log($"Share check error: {ex.Message}", true); }
 
-            // DFS
             try
             {
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
-                if (DfsService.DfsLinkExists(DfsServer, NamespaceRoot, linkName, ServerUsername, ServerPassword))
-                { Log($"DFS link {linkName} exists.", true); ok = false; }
-                else Log($"DFS link {linkName} free.");
+                if (DfsService.DfsLinkExists(NamespaceRoot, linkName))
+                    Log($"DFS link {linkName} exists.", true);
+                else
+                    Log($"DFS link {linkName} free.");
             }
-            catch (Exception ex) { Log($"DFS error: {ex.Message}", true); ok = false; }
-
-            Log(ok ? "All checks passed." : "Conflicts found.", ok);
+            catch (Exception ex) { Log($"DFS check error: {ex.Message}", true); }
         }
 
         private async void CreateGroups()
@@ -315,16 +295,10 @@ namespace DFS_Provisioner.ViewModels
                 }
                 else Log($"Group {WriteGroupName} already exists.");
 
-                System.Threading.Thread.Sleep(5000);
+                Thread.Sleep(5000);
                 Log("AD replication wait completed.");
             }
             catch (Exception ex) { Log($"Error: {ex.Message}", true); }
-        }
-
-        private string GetNetBiosDomain()
-        {
-            if (string.IsNullOrWhiteSpace(DomainName)) return "";
-            return DomainName.Split('.')[0].ToUpperInvariant();
         }
 
         private async void CreateShareAndNtfs()
@@ -332,7 +306,6 @@ namespace DFS_Provisioner.ViewModels
             Log("=== Share and NTFS ===");
             try
             {
-                // Ensure remote directory
                 ShareService.CreateRemoteDirectory(ShareServer, LocalPath, ServerUsername, ServerPassword);
                 Log($"Directory ensured: {LocalPath}");
 
@@ -344,14 +317,11 @@ namespace DFS_Provisioner.ViewModels
                 }
                 else Log($"Share '{ShareFolderName}' already exists.");
 
-                // Wait for AD replication (increase if needed)
-                System.Threading.Thread.Sleep(5000);
+                Thread.Sleep(5000);
 
-                // Get SIDs directly – no name resolution needed
                 var readGroupSid = AdService.GetGroupSid(DomainName, ReadGroupName, AdUsername, AdPassword);
                 var writeGroupSid = AdService.GetGroupSid(DomainName, WriteGroupName, AdUsername, AdPassword);
 
-                // Apply NTFS with SIDs
                 NtfsService.SetNtfsPermissions(ShareServer, LocalPath, readGroupSid, writeGroupSid,
                                                OwnerAccount, RemoveEveryone, ServerUsername, ServerPassword);
                 Log("NTFS permissions applied.");
@@ -366,8 +336,11 @@ namespace DFS_Provisioner.ViewModels
             {
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
                 var target = FolderTargetPathTemplate.Replace("{Server}", ShareServer).Replace("{ShareName}", ShareFolderName);
-                DfsService.CreateDfsLink(DfsServer, NamespaceRoot, linkName, target,
-                                         $"DFS link for {ShareFolderName}", ServerUsername, ServerPassword);
+                DfsService.CreateDfsLink(
+                    namespaceRoot: NamespaceRoot,
+                    linkName: linkName,
+                    folderTargetPath: target,
+                    description: $"DFS link for {ShareFolderName}");
                 Log($"DFS link '{linkName}' created.");
             }
             catch (Exception ex) { Log($"DFS error: {ex.Message}", true); }
@@ -382,21 +355,15 @@ namespace DFS_Provisioner.ViewModels
             Log("=== All operations completed ===");
         }
 
-
-        public event Action ClearLogRequested;
-        private void ClearLog()
-        {
-            ClearLogRequested?.Invoke();
-        }
-
-
         public event Action<string, bool> LogAppended;
-        private void Log(string msg, bool isError = false)
+        private void Log(string message, bool isError = false)
         {
             var prefix = isError ? "[ERROR] " : "[INFO] ";
-            var fullMessage = $"{DateTime.Now:T} {prefix}{msg}";
-            LogAppended?.Invoke(fullMessage, isError);
+            LogAppended?.Invoke($"{DateTime.Now:T} {prefix}{message}", isError);
         }
+
+        public event Action ClearLogRequested;
+        private void ClearLog() => ClearLogRequested?.Invoke();
 
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string name = null)

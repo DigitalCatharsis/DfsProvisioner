@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:DFS_Provisioner"
         mc:Ignorable="d"
         Title="DFS Provisioner"
         Height="700" Width="950"
@@ -24,7 +23,6 @@
             <Button Content="Save" Width="80" Margin="5,0,0,0" Command="{Binding SaveConfigCommand}"/>
         </StackPanel>
 
-        <!-- TabControl -->
         <TabControl Grid.Row="1">
             <!-- Credentials -->
             <TabItem Header="Credentials">
@@ -74,50 +72,56 @@
 
             <!-- AD Groups -->
             <TabItem Header="AD Groups">
-                <StackPanel Margin="15">
-                    <GroupBox Header="Group parameters" Padding="10">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                            </Grid.RowDefinitions>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="15">
+                        <GroupBox Header="Active Directory" Padding="10">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="Groups OU (DN):" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding GroupsOU}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Domain:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding DomainName}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Group name prefix:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding GroupNamePrefix}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Groups OU (DN):" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding GroupsOU}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Read suffix:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding ReadGroupSuffix}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Group name prefix:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding GroupNamePrefix}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Write suffix:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding WriteGroupSuffix}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Read suffix:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ReadGroupSuffix}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Read group name (editable):" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding ReadGroupName}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Write suffix:" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding WriteGroupSuffix}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Write group name (editable):" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding WriteGroupName}" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Read group name:" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ReadGroupName}" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Description template:" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding GroupDescriptionTemplate}" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Write group name:" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding WriteGroupName}" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Notes template:" VerticalAlignment="Center" Grid.Row="7" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding GroupNotesTemplate}" Grid.Row="7" Grid.Column="1" Margin="0,0,0,5"/>
-                        </Grid>
-                    </GroupBox>
-                </StackPanel>
+                                <TextBlock Text="Description template:" VerticalAlignment="Center" Grid.Row="7" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding GroupDescriptionTemplate}" Grid.Row="7" Grid.Column="1" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Notes template:" VerticalAlignment="Center" Grid.Row="8" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding GroupNotesTemplate}" Grid.Row="8" Grid.Column="1" Margin="0,0,0,5"/>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
             </TabItem>
 
             <!-- Share & NTFS -->
@@ -127,7 +131,6 @@
                         <GroupBox Header="Share configuration" Padding="10">
                             <Grid>
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -157,7 +160,6 @@
                                           Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                             </Grid>
                         </GroupBox>
-
                         <GroupBox Header="NTFS permissions (from groups)" Padding="10" Margin="0,10,0,0">
                             <StackPanel>
                                 <TextBlock>
@@ -210,8 +212,13 @@
             <TabItem Header="Log">
                 <Grid Margin="10">
                     <RichTextBox x:Name="LogRichTextBox" IsReadOnly="True" Background="#1E1E1E"
-                                 FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto"
-                                 Grid.Row="0"/>
+                                 FontFamily="Consolas" FontSize="12" VerticalScrollBarVisibility="Auto">
+                        <RichTextBox.Resources>
+                            <Style TargetType="Paragraph">
+                                <Setter Property="Margin" Value="0"/>
+                            </Style>
+                        </RichTextBox.Resources>
+                    </RichTextBox>
                 </Grid>
             </TabItem>
         </TabControl>

@@ -22,8 +22,8 @@
         public string GroupNamePrefix { get; set; }
         public string ReadGroupSuffix { get; set; }
         public string WriteGroupSuffix { get; set; }
-        public string ReadGroupName { get; set; }  
-        public string WriteGroupName { get; set; } 
+        public string ReadGroupName { get; set; }
+        public string WriteGroupName { get; set; }
         public string GroupDescriptionTemplate { get; set; }
         public string GroupNotesTemplate { get; set; }
     }
@@ -31,7 +31,7 @@
     public class ShareConfig
     {
         public string Server { get; set; }
-        public string LocalPath { get; set; }       // full path, e.g. E:\Shares\MyShare
+        public string LocalPath { get; set; }
         public string OwnerAccount { get; set; }
     }
 
