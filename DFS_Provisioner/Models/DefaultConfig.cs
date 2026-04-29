@@ -13,7 +13,8 @@
     {
         public string AdUsername { get; set; }
         public string ServerUsername { get; set; }
-        public string Server { get; set; }  // ← новое поле
+        public string Server { get; set; }
+        public string DfsUsername { get; set; }   
     }
 
     public class ActiveDirectoryConfig

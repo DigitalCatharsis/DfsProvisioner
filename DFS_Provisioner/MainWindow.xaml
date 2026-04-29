@@ -37,6 +37,8 @@
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto"/>
@@ -60,6 +62,12 @@
 
                                 <TextBlock Text="Server Password:" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
                                 <PasswordBox x:Name="ServerPasswordBox" Grid.Row="5" Grid.Column="1" Style="{StaticResource PasswordBoxStyle}"/>
+
+                                <TextBlock Text="DFS User:" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding DfsUsername}" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="DFS Password:" VerticalAlignment="Center" Grid.Row="7" Grid.Column="0" Margin="0,0,10,5"/>
+                                <PasswordBox x:Name="DfsPasswordBox" Grid.Row="7" Grid.Column="1" Style="{StaticResource PasswordBoxStyle}"/>
                             </Grid>
                         </GroupBox>
                     </StackPanel>

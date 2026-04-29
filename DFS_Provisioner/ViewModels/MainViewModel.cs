@@ -26,8 +26,10 @@ namespace DFS_Provisioner.ViewModels
         private string _linkNameTemplate;
         private string _readGroupName;
         private string _writeGroupName;
+        private string _dfsUsername;
 
-
+        public string DfsUsername { get => _dfsUsername; set { _dfsUsername = value; OnPropertyChanged(); } }
+        public SecureString DfsPassword { get; set; }
         public string ConfigFilePath { get => _configFilePath; set { _configFilePath = value; OnPropertyChanged(); } }
         public string DomainName { get => _domainName; set { _domainName = value; OnPropertyChanged(); } }
         public string AdUsername { get => _adUsername; set { _adUsername = value; OnPropertyChanged(); } }
@@ -162,7 +164,8 @@ namespace DFS_Provisioner.ViewModels
                 {
                     AdUsername = AdUsername,
                     ServerUsername = ServerUsername,
-                    Server = ShareServer
+                    Server = ShareServer,
+                    DfsUsername = DfsUsername
                 },
 
                 ActiveDirectory = new ActiveDirectoryConfig
@@ -197,7 +200,8 @@ namespace DFS_Provisioner.ViewModels
             {
                 AdUsername = config.Credentials.AdUsername ?? "";
                 ServerUsername = config.Credentials.ServerUsername ?? "";
-                ShareServer = config.Credentials.Server ?? "";  
+                ShareServer = config.Credentials.Server ?? "";
+                DfsUsername = config.Credentials.DfsUsername ?? "";
             }
             if (config.ActiveDirectory != null)
             {
@@ -263,9 +267,10 @@ namespace DFS_Provisioner.ViewModels
             try
             {
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
-                if (DfsService.DfsLinkExists(NamespaceRoot, linkName))
+                if (DfsService.DfsLinkExists(NamespaceRoot, linkName, DfsUsername, DfsPassword))
                     Log($"DFS link {linkName} exists.", true);
-                else Log($"DFS link {linkName} free.");
+                else
+                    Log($"DFS link {linkName} free.");
             }
             catch (Exception ex) { Log($"DFS check error: {ex.Message}", true); }
         }
@@ -355,7 +360,9 @@ namespace DFS_Provisioner.ViewModels
                     namespaceRoot: NamespaceRoot,
                     linkName: linkName,
                     folderTargetPath: target,
-                    description: $"DFS link for {ShareFolderName}");
+                    description: $"DFS link for {ShareFolderName}",
+                    username: DfsUsername,
+                    password: DfsPassword);
                 Log($"DFS link '{linkName}' created.");
             }
             catch (Exception ex) { Log($"DFS error: {ex.Message}", true); }

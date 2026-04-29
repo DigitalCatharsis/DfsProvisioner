@@ -1,23 +1,35 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
+using System.Net;
+using System.Security;
 using System.Text;
 
 namespace DFS_Provisioner.Services
 {
     public static class DfsService
     {
-        public static bool DfsLinkExists(string namespaceRoot, string linkName)
+        public static bool DfsLinkExists(string namespaceRoot, string linkName,
+                                         string username, SecureString password)
         {
             string path = $@"{namespaceRoot}\{linkName}";
-            string script = $"if (Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue) {{ 'EXISTS' }} else {{ 'NOT_FOUND' }}";
-            string result = RunPowerShell(script);
-            return result?.Contains("EXISTS") == true;
+            // Скрипт проверки: выводим EXISTS, если папка найдена
+            string script = $@"
+                if (Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue) {{
+                    Write-Output 'EXISTS'
+                }} else {{
+                    Write-Output 'NOT_FOUND'
+                }}
+            ";
+            string output = RunPowerShell(script, username, password);
+            return output?.Contains("EXISTS") == true;
         }
 
         public static void CreateDfsLink(string namespaceRoot, string linkName,
-                                         string folderTargetPath, string description)
+                                         string folderTargetPath, string description,
+                                         string username, SecureString password)
         {
             string path = $@"{namespaceRoot}\{linkName}";
-
+            // Скрипт создания: идемпотентно создаёт ссылку и цель
             string script = $@"
                 $existing = Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue
                 if (-not $existing) {{
@@ -31,10 +43,10 @@ namespace DFS_Provisioner.Services
                     }}
                 }}
             ";
-            RunPowerShell(script);
+            RunPowerShell(script, username, password);
         }
 
-        private static string RunPowerShell(string script)
+        private static string RunPowerShell(string script, string username, SecureString password)
         {
             var startInfo = new ProcessStartInfo
             {
@@ -47,6 +59,22 @@ namespace DFS_Provisioner.Services
                 StandardOutputEncoding = Encoding.UTF8,
                 StandardErrorEncoding = Encoding.UTF8,
             };
+
+            // Разбираем DOMAIN\user
+            if (!string.IsNullOrEmpty(username))
+            {
+                var parts = username.Split('\\');
+                if (parts.Length == 2)
+                {
+                    startInfo.Domain = parts[0];
+                    startInfo.UserName = parts[1];
+                }
+                else
+                {
+                    startInfo.UserName = username;
+                }
+                startInfo.Password = password.Copy(); // передаём SecureString без конвертации
+            }
 
             using (var process = new Process { StartInfo = startInfo })
             {

@@ -16,6 +16,7 @@ namespace DFS_Provisioner
 
             AdPasswordBox.PasswordChanged += (_, _) => ViewModel.AdPassword = AdPasswordBox.SecurePassword;
             ServerPasswordBox.PasswordChanged += (_, _) => ViewModel.ServerPassword = ServerPasswordBox.SecurePassword;
+            DfsPasswordBox.PasswordChanged += (_, _) => ViewModel.DfsPassword = DfsPasswordBox.SecurePassword;
 
             ViewModel.LogAppended += (msg, isError) =>
             {
