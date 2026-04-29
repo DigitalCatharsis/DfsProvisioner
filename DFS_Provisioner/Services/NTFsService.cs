@@ -1,120 +1,132 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Management;
 using System.Net;
 using System.Security;
 using System.Security.AccessControl;
-using System.Security.Principal;
-using System.Runtime.InteropServices;
 
 namespace DFS_Provisioner.Services
 {
     public static class NtfsService
     {
-        [DllImport("mpr.dll")]
-        private static extern int WNetCancelConnection2(string name, int flags, bool force);
-
         public static void SetNtfsPermissions(string server, string directoryPath,
                                               string readGroupSid, string writeGroupSid,
-                                              string ownerAccount, bool removeEveryone,
+                                              string ownerAccount,
                                               string username, SecureString password)
         {
-            var driveLetter = directoryPath.Substring(0, 1).ToUpperInvariant();
-            var folderPath = directoryPath.Substring(2).TrimStart('\\'); // удаляем "C:" или "C:\"
-            var adminSharePath = $@"\\{server}\{driveLetter}$";
-            var fullUncPath = $@"{adminSharePath}\{folderPath}";
+            var scope = GetManagementScope(server, username, password);
+            SetOwner(scope, directoryPath); // не критично
 
-            var credentials = new NetworkCredential(username, ToPlainString(password));
+            var mo = new ManagementObject(scope,
+                new ManagementPath($"Win32_LogicalFileSecuritySetting.Path='{directoryPath}'"), null);
 
-            // 1. Отключаем ВСЕ соединения с этим сервером (не только конкретную шару)
-            DisconnectAllFromServer(server);
+            // Получаем дескриптор
+            var outParams = mo.InvokeMethod("GetSecurityDescriptor", null, null);
+            if (outParams == null)
+                throw new Exception("GetSecurityDescriptor returned null.");
+            var sd = (ManagementBaseObject)outParams["Descriptor"];
+            if (sd == null)
+                throw new Exception("Security descriptor is null.");
 
-            // 2. Создаём новое подключение
-            using (new NetworkConnection(adminSharePath, credentials))
-            {
-                var dirInfo = new DirectoryInfo(fullUncPath);
-                if (!dirInfo.Exists)
-                    throw new DirectoryNotFoundException($"Directory not found: {fullUncPath}");
+            // Удаляем Everyone всегда (если нужно управлять флагом, добавьте параметр)
+            RemoveEveryone(sd);
 
-                var security = dirInfo.GetAccessControl();
+            // Удаляем старые ACE для наших групп
+            RemoveAcesBySid(sd, readGroupSid);
+            RemoveAcesBySid(sd, writeGroupSid);
 
-                if (removeEveryone)
-                {
-                    security.RemoveAccessRuleAll(new FileSystemAccessRule(
-                        new SecurityIdentifier(WellKnownSidType.WorldSid, null),
-                        FileSystemRights.FullControl,
-                        InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                        PropagationFlags.None,
-                        AccessControlType.Allow));
-                }
+            // Добавляем новые ACE
+            AddAce(sd, readGroupSid, (uint)FileSystemRights.ReadAndExecute,
+                   (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
+            AddAce(sd, writeGroupSid, (uint)FileSystemRights.Modify,
+                   (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
 
-                var readSidObj = new SecurityIdentifier(readGroupSid);
-                var writeSidObj = new SecurityIdentifier(writeGroupSid);
-
-                RemoveSpecificRule(security, readSidObj);
-                RemoveSpecificRule(security, writeSidObj);
-
-                security.AddAccessRule(new FileSystemAccessRule(
-                    readSidObj,
-                    FileSystemRights.ReadAndExecute,
-                    InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                    PropagationFlags.None,
-                    AccessControlType.Allow));
-
-                security.AddAccessRule(new FileSystemAccessRule(
-                    writeSidObj,
-                    FileSystemRights.Modify,
-                    InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                    PropagationFlags.None,
-                    AccessControlType.Allow));
-
-                if (!string.IsNullOrWhiteSpace(ownerAccount))
-                {
-                    try
-                    {
-                        security.SetOwner(new NTAccount(ownerAccount));
-                    }
-                    catch { }
-                }
-
-                dirInfo.SetAccessControl(security);
-            }
+            // Применяем обратно
+            var setParams = mo.GetMethodParameters("SetSecurityDescriptor");
+            if (setParams == null)
+                throw new Exception("GetMethodParameters for SetSecurityDescriptor returned null.");
+            setParams["Descriptor"] = sd;
+            var result = mo.InvokeMethod("SetSecurityDescriptor", setParams, null);
+            if (result == null)
+                throw new Exception("SetSecurityDescriptor returned null.");
+            uint ret = (uint)result["ReturnValue"];
+            if (ret != 0)
+                throw new Exception($"SetSecurityDescriptor failed with code {ret}");
         }
 
-        /// <summary>
-        /// Отключает все сетевые соединения с указанным сервером.
-        /// </summary>
-        private static void DisconnectAllFromServer(string server)
+        // Вспомогательные методы
+
+        private static ManagementScope GetManagementScope(string server, string username, SecureString password)
         {
-            // Пытаемся отключить IPC$ (основное соединение) и административные шары
-            var pathsToDisconnect = new[]
+            var options = new ConnectionOptions
             {
-                $@"\\{server}\IPC$",
-                $@"\\{server}\C$",
-                $@"\\{server}\D$",
-                $@"\\{server}\E$",
-                $@"\\{server}\F$",
-                $@"\\{server}",
+                Username = username,
+                Password = ToPlainString(password),
+                Authentication = AuthenticationLevel.PacketPrivacy
             };
-
-            foreach (var path in pathsToDisconnect)
-            {
-                // Принудительно отключаем, игнорируем ошибки (если не было подключено)
-                WNetCancelConnection2(path, 0, true);
-            }
-
-            // Небольшая пауза, чтобы Windows успела освободить ресурсы
-            System.Threading.Thread.Sleep(500);
+            var scope = new ManagementScope($@"\\{server}\root\cimv2", options);
+            scope.Connect();
+            return scope;
         }
 
-        private static void RemoveSpecificRule(DirectorySecurity security, SecurityIdentifier sid)
+        private static void SetOwner(ManagementScope scope, string path)
         {
-            var rules = security.GetAccessRules(true, true, typeof(SecurityIdentifier));
-            foreach (FileSystemAccessRule rule in rules)
+            var mo = new ManagementObject(scope,
+                new ManagementPath($"Win32_LogicalFileSecuritySetting.Path='{path}'"), null);
+            try { mo.InvokeMethod("TakeOwnership", null, null); } catch { }
+        }
+
+        private static void RemoveEveryone(ManagementBaseObject sd)
+        {
+            if (sd["DACL"] is ManagementBaseObject[] dacl)
             {
-                if (rule.IdentityReference == sid)
+                var filtered = new List<ManagementBaseObject>();
+                foreach (var ace in dacl)
                 {
-                    security.RemoveAccessRuleAll(rule);
+                    if (ace["Trustee"] is ManagementBaseObject trustee &&
+                        trustee["SIDString"]?.ToString() == "S-1-1-0")
+                        continue;
+                    filtered.Add(ace);
                 }
+                sd["DACL"] = filtered.ToArray();
             }
+        }
+
+        private static void RemoveAcesBySid(ManagementBaseObject sd, string sid)
+        {
+            if (sd["DACL"] is ManagementBaseObject[] dacl)
+            {
+                var filtered = new List<ManagementBaseObject>();
+                foreach (var ace in dacl)
+                {
+                    if (ace["Trustee"] is ManagementBaseObject trustee &&
+                        trustee["SIDString"]?.ToString() == sid)
+                        continue;
+                    filtered.Add(ace);
+                }
+                sd["DACL"] = filtered.ToArray();
+            }
+        }
+
+        private static void AddAce(ManagementBaseObject sd, string sid, uint accessMask, uint aceFlags)
+        {
+            // Корректное создание через CreateInstance
+            var trusteeClass = new ManagementClass("Win32_Trustee");
+            var trusteeObj = trusteeClass.CreateInstance();
+            trusteeObj["SIDString"] = sid;
+
+            var aceClass = new ManagementClass("Win32_Ace");
+            var aceObj = aceClass.CreateInstance();
+            aceObj["Trustee"] = trusteeObj;
+            aceObj["AccessMask"] = accessMask;
+            aceObj["AceFlags"] = aceFlags;
+            aceObj["AceType"] = 0; // Allow
+
+            var dacl = sd["DACL"] as ManagementBaseObject[] ?? Array.Empty<ManagementBaseObject>();
+            var newDacl = new ManagementBaseObject[dacl.Length + 1];
+            Array.Copy(dacl, newDacl, dacl.Length);
+            newDacl[^1] = aceObj;
+            sd["DACL"] = newDacl;
         }
 
         private static string ToPlainString(SecureString secure)

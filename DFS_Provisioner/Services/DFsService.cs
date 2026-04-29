@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 
 namespace DFS_Provisioner.Services
@@ -9,7 +8,6 @@ namespace DFS_Provisioner.Services
         public static bool DfsLinkExists(string namespaceRoot, string linkName)
         {
             string path = $@"{namespaceRoot}\{linkName}";
-            // Проверяем через Get-DfsnFolder. Если папка найдена – выводим EXISTS.
             string script = $"if (Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue) {{ 'EXISTS' }} else {{ 'NOT_FOUND' }}";
             string result = RunPowerShell(script);
             return result?.Contains("EXISTS") == true;
@@ -20,14 +18,12 @@ namespace DFS_Provisioner.Services
         {
             string path = $@"{namespaceRoot}\{linkName}";
 
-            // Создаём ссылку вместе с целевой папкой (аналог вашей успешной команды)
             string script = $@"
                 $existing = Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue
                 if (-not $existing) {{
                     New-DfsnFolder -Path '{path}' -TargetPath '{folderTargetPath}' -Description '{description}'
                     Write-Output 'DFS link created.'
                 }} else {{
-                    # Проверяем, есть ли такая цель
                     $targets = Get-DfsnFolderTarget -Path '{path}'
                     if (-not ($targets | Where-Object {{ $_.TargetPath -eq '{folderTargetPath}' }})) {{
                         New-DfsnFolderTarget -Path '{path}' -TargetPath '{folderTargetPath}'
@@ -59,8 +55,9 @@ namespace DFS_Provisioner.Services
                 string error = process.StandardError.ReadToEnd();
                 process.WaitForExit();
 
-                if (process.ExitCode != 0 && !string.IsNullOrWhiteSpace(error))
-                    throw new Exception($"PowerShell error: {error}");
+                if (process.ExitCode != 0)
+                    throw new Exception($"PowerShell error ({process.ExitCode}): {output}{error}");
+
                 return output;
             }
         }

@@ -1,10 +1,7 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security;
-using System.Text.RegularExpressions;
-using System.Threading;
 using System.Windows.Input;
 using Newtonsoft.Json;
 using DFS_Provisioner.Models;
@@ -18,48 +15,44 @@ namespace DFS_Provisioner.ViewModels
         private string _domainName;
         private string _adUsername;
         private string _serverUsername;
+        private string _shareServer;
         private string _groupsOU;
-        private string _groupNamePrefix;
-        private string _readGroupSuffix;
-        private string _writeGroupSuffix;
         private string _groupDescriptionTemplate;
         private string _groupNotesTemplate;
-        private string _shareServer;
         private string _localPath;
         private string _ownerAccount;
-        private bool _removeEveryone;
-        private string _dfsServer;
+        private bool _removeEveryoneFromShare;
         private string _namespaceRoot;
         private string _linkNameTemplate;
-        private string _folderTargetPathTemplate;
         private string _readGroupName;
         private string _writeGroupName;
+
 
         public string ConfigFilePath { get => _configFilePath; set { _configFilePath = value; OnPropertyChanged(); } }
         public string DomainName { get => _domainName; set { _domainName = value; OnPropertyChanged(); } }
         public string AdUsername { get => _adUsername; set { _adUsername = value; OnPropertyChanged(); } }
         public string ServerUsername { get => _serverUsername; set { _serverUsername = value; OnPropertyChanged(); } }
-        public string GroupsOU { get => _groupsOU; set { _groupsOU = value; OnPropertyChanged(); } }
-        public string GroupNamePrefix { get => _groupNamePrefix; set { _groupNamePrefix = value; OnPropertyChanged(); } }
-        public string ReadGroupSuffix { get => _readGroupSuffix; set { _readGroupSuffix = value; OnPropertyChanged(); } }
-        public string WriteGroupSuffix { get => _writeGroupSuffix; set { _writeGroupSuffix = value; OnPropertyChanged(); } }
+        public string ShareServer { get => _shareServer; set { _shareServer = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareUncPreview)); OnPropertyChanged(nameof(DfsTargetPreview)); } }
+        public string GroupsOU { get => _groupsOU; set { _groupsOU = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewRead)); OnPropertyChanged(nameof(AdGroupPreviewWrite)); } }
         public string GroupDescriptionTemplate { get => _groupDescriptionTemplate; set { _groupDescriptionTemplate = value; OnPropertyChanged(); } }
         public string GroupNotesTemplate { get => _groupNotesTemplate; set { _groupNotesTemplate = value; OnPropertyChanged(); } }
-        public string ShareServer { get => _shareServer; set { _shareServer = value; OnPropertyChanged(); } }
         public string LocalPath
         {
             get => _localPath;
-            set { _localPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareFolderName)); }
+            set { _localPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareFolderName)); OnPropertyChanged(nameof(ShareUncPreview)); OnPropertyChanged(nameof(DfsTargetPreview)); }
         }
         public string OwnerAccount { get => _ownerAccount; set { _ownerAccount = value; OnPropertyChanged(); } }
-        public bool RemoveEveryone { get => _removeEveryone; set { _removeEveryone = value; OnPropertyChanged(); } }
-        public string DfsServer { get => _dfsServer; set { _dfsServer = value; OnPropertyChanged(); } }
-        public string NamespaceRoot { get => _namespaceRoot; set { _namespaceRoot = value; OnPropertyChanged(); } }
-        public string LinkNameTemplate { get => _linkNameTemplate; set { _linkNameTemplate = value; OnPropertyChanged(); } }
-        public string FolderTargetPathTemplate { get => _folderTargetPathTemplate; set { _folderTargetPathTemplate = value; OnPropertyChanged(); } }
-        public string ReadGroupName { get => _readGroupName; set { _readGroupName = value; OnPropertyChanged(); } }
-        public string WriteGroupName { get => _writeGroupName; set { _writeGroupName = value; OnPropertyChanged(); } }
+        public bool RemoveEveryoneFromShare { get => _removeEveryoneFromShare; set { _removeEveryoneFromShare = value; OnPropertyChanged(); } }
 
+        public string NamespaceRoot { get => _namespaceRoot; set { _namespaceRoot = value; OnPropertyChanged(); OnPropertyChanged(nameof(DfsPathPreview)); } }
+        public string LinkNameTemplate { get => _linkNameTemplate; set { _linkNameTemplate = value; OnPropertyChanged(); OnPropertyChanged(nameof(DfsPathPreview)); } }
+        public string ReadGroupName { get => _readGroupName; set { _readGroupName = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewRead)); } }
+        public string WriteGroupName { get => _writeGroupName; set { _writeGroupName = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewWrite)); } }
+
+        public SecureString AdPassword { get; set; }
+        public SecureString ServerPassword { get; set; }
+
+        // Вычисляемые свойства для превью
         public string ShareFolderName
         {
             get
@@ -69,9 +62,26 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
-        public SecureString AdPassword { get; set; }
-        public SecureString ServerPassword { get; set; }
+        public string ShareUncPreview => $@"\\{ShareServer}\{ShareFolderName}";
+        public string DfsTargetPreview => ShareUncPreview;
 
+        public string DfsPathPreview
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(NamespaceRoot) || string.IsNullOrWhiteSpace(LinkNameTemplate))
+                    return string.Empty;
+                var link = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
+                return $@"{NamespaceRoot.TrimEnd('\\')}\{link}";
+            }
+        }
+
+        public string AdGroupPreviewRead =>
+            string.IsNullOrWhiteSpace(ReadGroupName) ? "" : $"CN={ReadGroupName},{GroupsOU?.TrimStart(',')}";
+        public string AdGroupPreviewWrite =>
+            string.IsNullOrWhiteSpace(WriteGroupName) ? "" : $"CN={WriteGroupName},{GroupsOU?.TrimStart(',')}";
+
+        // Валидация
         public string this[string columnName]
         {
             get
@@ -89,6 +99,7 @@ namespace DFS_Provisioner.ViewModels
         }
         public string Error => null;
 
+        // Команды
         public ICommand LoadConfigCommand { get; }
         public ICommand SaveConfigCommand { get; }
         public ICommand CheckAllCommand { get; }
@@ -147,28 +158,25 @@ namespace DFS_Provisioner.ViewModels
         {
             var config = new DefaultConfig
             {
-                Credentials = new CredentialsConfig { AdUsername = AdUsername, ServerUsername = ServerUsername },
+                Credentials = new CredentialsConfig
+                {
+                    AdUsername = AdUsername,
+                    ServerUsername = ServerUsername,
+                    Server = ShareServer
+                },
+
                 ActiveDirectory = new ActiveDirectoryConfig
                 {
                     Domain = DomainName,
                     GroupsOU = GroupsOU,
-                    GroupNamePrefix = GroupNamePrefix,
-                    ReadGroupSuffix = ReadGroupSuffix,
-                    WriteGroupSuffix = WriteGroupSuffix,
                     ReadGroupName = ReadGroupName,
                     WriteGroupName = WriteGroupName,
                     GroupDescriptionTemplate = GroupDescriptionTemplate,
                     GroupNotesTemplate = GroupNotesTemplate
                 },
-                Share = new ShareConfig { Server = ShareServer, LocalPath = LocalPath, OwnerAccount = OwnerAccount },
-                Dfs = new DfsConfig
-                {
-                    NamespaceServer = DfsServer,
-                    NamespaceRoot = NamespaceRoot,
-                    LinkNameTemplate = LinkNameTemplate,
-                    FolderTargetPathTemplate = FolderTargetPathTemplate
-                },
-                Options = new OptionsConfig { RemoveEveryoneFromNTFS = RemoveEveryone, ADReplicationWaitSeconds = 5 }
+                Share = new ShareConfig { LocalPath = LocalPath, OwnerAccount = OwnerAccount },
+                Dfs = new DfsConfig { NamespaceRoot = NamespaceRoot, LinkNameTemplate = LinkNameTemplate },
+                Options = new OptionsConfig { ADReplicationWaitSeconds = 5 }
             };
             var dlg = new Microsoft.Win32.SaveFileDialog { Filter = "JSON|*.json" };
             if (dlg.ShowDialog() == true)
@@ -189,41 +197,32 @@ namespace DFS_Provisioner.ViewModels
             {
                 AdUsername = config.Credentials.AdUsername ?? "";
                 ServerUsername = config.Credentials.ServerUsername ?? "";
+                ShareServer = config.Credentials.Server ?? "";  
             }
             if (config.ActiveDirectory != null)
             {
                 DomainName = config.ActiveDirectory.Domain ?? "";
                 GroupsOU = config.ActiveDirectory.GroupsOU ?? "";
-                GroupNamePrefix = config.ActiveDirectory.GroupNamePrefix ?? "";
-                ReadGroupSuffix = config.ActiveDirectory.ReadGroupSuffix ?? "";
-                WriteGroupSuffix = config.ActiveDirectory.WriteGroupSuffix ?? "";
                 GroupDescriptionTemplate = config.ActiveDirectory.GroupDescriptionTemplate ?? "";
                 GroupNotesTemplate = config.ActiveDirectory.GroupNotesTemplate ?? "";
 
                 var folderName = string.IsNullOrWhiteSpace(LocalPath) ? "MyShare" : ShareFolderName;
                 ReadGroupName = !string.IsNullOrWhiteSpace(config.ActiveDirectory.ReadGroupName)
                     ? config.ActiveDirectory.ReadGroupName
-                    : $"{GroupNamePrefix}{folderName}{ReadGroupSuffix}";
+                    : $"{folderName}_Read";
                 WriteGroupName = !string.IsNullOrWhiteSpace(config.ActiveDirectory.WriteGroupName)
                     ? config.ActiveDirectory.WriteGroupName
-                    : $"{GroupNamePrefix}{folderName}{WriteGroupSuffix}";
+                    : $"{folderName}_Write";
             }
             if (config.Share != null)
             {
-                ShareServer = config.Share.Server ?? "";
                 LocalPath = config.Share.LocalPath ?? "";
                 OwnerAccount = config.Share.OwnerAccount ?? "";
             }
             if (config.Dfs != null)
             {
-                DfsServer = config.Dfs.NamespaceServer ?? "";
                 NamespaceRoot = config.Dfs.NamespaceRoot ?? "";
                 LinkNameTemplate = config.Dfs.LinkNameTemplate ?? "";
-                FolderTargetPathTemplate = config.Dfs.FolderTargetPathTemplate ?? "";
-            }
-            if (config.Options != null)
-            {
-                RemoveEveryone = config.Options.RemoveEveryoneFromNTFS;
             }
         }
 
@@ -266,8 +265,7 @@ namespace DFS_Provisioner.ViewModels
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
                 if (DfsService.DfsLinkExists(NamespaceRoot, linkName))
                     Log($"DFS link {linkName} exists.", true);
-                else
-                    Log($"DFS link {linkName} free.");
+                else Log($"DFS link {linkName} free.");
             }
             catch (Exception ex) { Log($"DFS check error: {ex.Message}", true); }
         }
@@ -322,8 +320,25 @@ namespace DFS_Provisioner.ViewModels
                 var readGroupSid = AdService.GetGroupSid(DomainName, ReadGroupName, AdUsername, AdPassword);
                 var writeGroupSid = AdService.GetGroupSid(DomainName, WriteGroupName, AdUsername, AdPassword);
 
+                Log("Configuring share permissions...");
+                ShareService.SetSharePermissions(ShareServer, ShareFolderName, readGroupSid, writeGroupSid,
+                                                 RemoveEveryoneFromShare, ServerUsername, ServerPassword);
+                Log("Share permissions applied.");
+
+                Thread.Sleep(2000); // небольшая пауза перед NTFS
+
+                Log("Configuring NTFS permissions...");
                 NtfsService.SetNtfsPermissions(ShareServer, LocalPath, readGroupSid, writeGroupSid,
-                                               OwnerAccount, RemoveEveryone, ServerUsername, ServerPassword);
+                                               OwnerAccount, ServerUsername, ServerPassword);
+                Log("NTFS permissions applied.");
+
+                // Share permissions
+                ShareService.SetSharePermissions(ShareServer, ShareFolderName, readGroupSid, writeGroupSid,
+                                                 RemoveEveryoneFromShare, ServerUsername, ServerPassword);
+
+                // NTFS permissions
+                NtfsService.SetNtfsPermissions(ShareServer, LocalPath, readGroupSid, writeGroupSid,
+                                               OwnerAccount, ServerUsername, ServerPassword);
                 Log("NTFS permissions applied.");
             }
             catch (Exception ex) { Log($"Share/NTFS error: {ex.Message}", true); }
@@ -335,7 +350,7 @@ namespace DFS_Provisioner.ViewModels
             try
             {
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
-                var target = FolderTargetPathTemplate.Replace("{Server}", ShareServer).Replace("{ShareName}", ShareFolderName);
+                var target = $@"\\{ShareServer}\{ShareFolderName}";
                 DfsService.CreateDfsLink(
                     namespaceRoot: NamespaceRoot,
                     linkName: linkName,

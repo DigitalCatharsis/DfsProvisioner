@@ -28,9 +28,12 @@
             <TabItem Header="Credentials">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="15">
-                        <GroupBox Header="Active Directory" Padding="10">
+                        <GroupBox Header="Domain and Servers" Padding="10">
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -39,31 +42,24 @@
                                     <ColumnDefinition Width="Auto"/>
                                     <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
+
                                 <TextBlock Text="Domain:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
                                 <TextBox Text="{Binding DomainName}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
-                                <TextBlock Text="User:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
+
+                                <TextBlock Text="AD User:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
                                 <TextBox Text="{Binding AdUsername}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
-                                <TextBlock Text="Password:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
+
+                                <TextBlock Text="AD Password:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
                                 <PasswordBox x:Name="AdPasswordBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource PasswordBoxStyle}"/>
-                            </Grid>
-                        </GroupBox>
-                        <GroupBox Header="File Server" Padding="10" Margin="0,10,0,0">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Text="Server (UNC):" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ShareServer}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
-                                <TextBlock Text="User:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ServerUsername}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
-                                <TextBlock Text="Password:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-                                <PasswordBox x:Name="ServerPasswordBox" Grid.Row="2" Grid.Column="1" Style="{StaticResource PasswordBoxStyle}"/>
+
+                                <TextBlock Text="Server:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ShareServer}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Server User:" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ServerUsername}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
+
+                                <TextBlock Text="Server Password:" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
+                                <PasswordBox x:Name="ServerPasswordBox" Grid.Row="5" Grid.Column="1" Style="{StaticResource PasswordBoxStyle}"/>
                             </Grid>
                         </GroupBox>
                     </StackPanel>
@@ -72,56 +68,48 @@
 
             <!-- AD Groups -->
             <TabItem Header="AD Groups">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="15">
-                        <GroupBox Header="Active Directory" Padding="10">
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
+                <StackPanel Margin="15">
+                    <GroupBox Header="Group Properties" Padding="10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
 
-                                <TextBlock Text="Domain:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding DomainName}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Groups OU (DN):" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding GroupsOU}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <TextBlock Text="Groups OU (DN):" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding GroupsOU}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Read Group Name:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding ReadGroupName}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <TextBlock Text="Group name prefix:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding GroupNamePrefix}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Write Group Name:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding WriteGroupName}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <TextBlock Text="Read suffix:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ReadGroupSuffix}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Description Template:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding GroupDescriptionTemplate}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <TextBlock Text="Write suffix:" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding WriteGroupSuffix}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Notes Template:" VerticalAlignment="Center" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding GroupNotesTemplate}" Grid.Row="4" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <TextBlock Text="Read group name:" VerticalAlignment="Center" Grid.Row="5" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ReadGroupName}" Grid.Row="5" Grid.Column="1" Margin="0,0,0,5"/>
-
-                                <TextBlock Text="Write group name:" VerticalAlignment="Center" Grid.Row="6" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding WriteGroupName}" Grid.Row="6" Grid.Column="1" Margin="0,0,0,5"/>
-
-                                <TextBlock Text="Description template:" VerticalAlignment="Center" Grid.Row="7" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding GroupDescriptionTemplate}" Grid.Row="7" Grid.Column="1" Margin="0,0,0,5"/>
-
-                                <TextBlock Text="Notes template:" VerticalAlignment="Center" Grid.Row="8" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding GroupNotesTemplate}" Grid.Row="8" Grid.Column="1" Margin="0,0,0,5"/>
-                            </Grid>
-                        </GroupBox>
-                    </StackPanel>
-                </ScrollViewer>
+                            <!-- Preview -->
+                            <TextBlock Grid.Row="5" Grid.ColumnSpan="2" Margin="0,10,0,5" FontWeight="SemiBold">
+                                <Run Text="Group locations preview:"/>
+                            </TextBlock>
+                            <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Text="{Binding AdGroupPreviewRead}" Foreground="Gray"/>
+                            <TextBlock Grid.Row="7" Grid.ColumnSpan="2" Text="{Binding AdGroupPreviewWrite}" Foreground="Gray"/>
+                        </Grid>
+                    </GroupBox>
+                </StackPanel>
             </TabItem>
 
             <!-- Share & NTFS -->
@@ -131,6 +119,7 @@
                         <GroupBox Header="Share configuration" Padding="10">
                             <Grid>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
                                     <RowDefinition Height="Auto"/>
@@ -146,17 +135,18 @@
                                 <TextBox Text="{Binding LocalPath, ValidatesOnDataErrors=True}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"
                                          Style="{StaticResource ValidatedTextBox}"/>
 
-                                <TextBlock Text="Server (UNC):" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ShareServer}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+                                <TextBlock Text="Share name (auto):" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ShareFolderName, Mode=OneWay}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"
+                                         IsReadOnly="True" Background="#F5F5F5"/>
 
-                                <TextBlock Text="Share name (auto):" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-                                <TextBox Text="{Binding ShareFolderName, Mode=OneWay}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
+                                <TextBlock Text="Share UNC preview:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
+                                <TextBox Text="{Binding ShareUncPreview, Mode=OneWay}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"
                                          IsReadOnly="True" Background="#F5F5F5"/>
 
                                 <TextBlock Text="Folder owner:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
                                 <TextBox Text="{Binding OwnerAccount}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
 
-                                <CheckBox Content="Remove Everyone" IsChecked="{Binding RemoveEveryone}"
+                                <CheckBox Content="Remove Everyone from share permissions" IsChecked="{Binding RemoveEveryoneFromShare}"
                                           Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="0,5,0,0"/>
                             </Grid>
                         </GroupBox>
@@ -186,23 +176,25 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Text="DFS server:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding DfsServer}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Namespace root:" VerticalAlignment="Center" Grid.Row="0" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding NamespaceRoot}" Grid.Row="0" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Namespace root:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding NamespaceRoot}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Link template:" VerticalAlignment="Center" Grid.Row="1" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding LinkNameTemplate}" Grid.Row="1" Grid.Column="1" Margin="0,0,0,5"/>
 
-                            <TextBlock Text="Link template:" VerticalAlignment="Center" Grid.Row="2" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding LinkNameTemplate}" Grid.Row="2" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Margin="0,10,0,5" FontWeight="SemiBold">Preview:</TextBlock>
+                            <TextBlock Text="DFS path:" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding DfsPathPreview, Mode=OneWay}" Grid.Row="3" Grid.Column="1" IsReadOnly="True" Background="#F5F5F5"/>
 
-                            <TextBlock Text="Target path template:" VerticalAlignment="Center" Grid.Row="3" Grid.Column="0" Margin="0,0,10,5"/>
-                            <TextBox Text="{Binding FolderTargetPathTemplate}" Grid.Row="3" Grid.Column="1" Margin="0,0,0,5"/>
+                            <TextBlock Text="Target:" Grid.Row="4" Grid.Column="0" Margin="0,0,10,5"/>
+                            <TextBox Text="{Binding DfsTargetPreview, Mode=OneWay}" Grid.Row="4" Grid.Column="1" IsReadOnly="True" Background="#F5F5F5"/>
                         </Grid>
                     </GroupBox>
                 </StackPanel>
