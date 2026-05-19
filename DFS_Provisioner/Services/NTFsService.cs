@@ -1,26 +1,30 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Management;
+﻿using System.Management;
 using System.Net;
 using System.Security;
 using System.Security.AccessControl;
+using System.Security.Principal;
 
 namespace DFS_Provisioner.Services
 {
+    /// <summary>
+    /// Applies NTFS permissions to a remote directory via WMI.
+    /// Always removes the Everyone group and then adds the specified read and write groups.
+    /// Also sets the folder owner if an owner account is provided.
+    /// </summary>
     public static class NtfsService
     {
+        /// <summary>Configures NTFS permissions and optionally sets the owner.</summary>
         public static void SetNtfsPermissions(string server, string directoryPath,
-                                              string readGroupSid, string writeGroupSid,
-                                              string ownerAccount,
-                                              string username, SecureString password)
+        string readGroupSid, string writeGroupSid,
+        string ownerAccount,
+        string username, SecureString password)
         {
             var scope = GetManagementScope(server, username, password);
-            SetOwner(scope, directoryPath); // не критично
 
             var mo = new ManagementObject(scope,
-                new ManagementPath($"Win32_LogicalFileSecuritySetting.Path='{directoryPath}'"), null);
+            new ManagementPath($"Win32_LogicalFileSecuritySetting.Path='{directoryPath}'"), null);
 
-            // Получаем дескриптор
+            // Get current security descriptor 
             var outParams = mo.InvokeMethod("GetSecurityDescriptor", null, null);
             if (outParams == null)
                 throw new Exception("GetSecurityDescriptor returned null.");
@@ -28,25 +32,47 @@ namespace DFS_Provisioner.Services
             if (sd == null)
                 throw new Exception("Security descriptor is null.");
 
-            // Удаляем Everyone всегда (если нужно управлять флагом, добавьте параметр)
-            RemoveEveryone(sd);
+            // 1. Filter the DACL: remove all inherited entries (flag 0x10),
+            // to prevent them from being duplicated when saving.
+            if (sd["DACL"] is ManagementBaseObject[] dacl)
+            {
+                var explicitAces = new List<ManagementBaseObject>();
+                foreach (var ace in dacl)
+                {
+                    uint aceFlags = (uint)ace["AceFlags"];
+                    // 0x10 (16) is the INHERITED_ACE flag. Skip such entries.
+                    if ((aceFlags & 0x10) == 0)
+                    {
+                        explicitAces.Add(ace);
+                    }
+                }
+                sd["DACL"] = explicitAces.ToArray();
+            }
 
-            // Удаляем старые ACE для наших групп
+            // 2. Set owner if account is specified 
+            if (!string.IsNullOrWhiteSpace(ownerAccount))
+                SetOwner(scope, sd, ownerAccount);
+
+            // 3. Remove Everyone and old group ACEs (only from the list of explicit rights) 
+            RemoveEveryone(sd);
             RemoveAcesBySid(sd, readGroupSid);
             RemoveAcesBySid(sd, writeGroupSid);
 
-            // Добавляем новые ACE
-            AddAce(sd, readGroupSid, (uint)FileSystemRights.ReadAndExecute,
-                   (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
-            AddAce(sd, writeGroupSid, (uint)FileSystemRights.Modify,
-                   (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
+            // 4. Add new ACEs 
+            AddAce(scope, sd, readGroupSid, (uint)FileSystemRights.ReadAndExecute,
+            (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
+            AddAce(scope, sd, writeGroupSid, (uint)FileSystemRights.Modify,
+            (uint)(InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit));
 
-            // Применяем обратно
+            // 5. Set control flags. 
+            // 0x8004 = SE_SELF_RELATIVE | SE_DACL_PRESENT 
+            sd["ControlFlags"] = 0x8404;
+
+            // Apply the updated descriptor 
             var setParams = mo.GetMethodParameters("SetSecurityDescriptor");
-            if (setParams == null)
-                throw new Exception("GetMethodParameters for SetSecurityDescriptor returned null.");
             setParams["Descriptor"] = sd;
             var result = mo.InvokeMethod("SetSecurityDescriptor", setParams, null);
+
             if (result == null)
                 throw new Exception("SetSecurityDescriptor returned null.");
             uint ret = (uint)result["ReturnValue"];
@@ -54,7 +80,32 @@ namespace DFS_Provisioner.Services
                 throw new Exception($"SetSecurityDescriptor failed with code {ret}");
         }
 
-        // Вспомогательные методы
+        /// <summary>Sets the owner field of the security descriptor to the specified account's SID.</summary>
+        private static void SetOwner(ManagementScope scope, ManagementBaseObject sd, string ownerAccount)
+        {
+            try
+            {
+                var ntAccount = new NTAccount(ownerAccount);
+                var sid = (SecurityIdentifier)ntAccount.Translate(typeof(SecurityIdentifier));
+
+                byte[] sidBytes = new byte[sid.BinaryLength];
+                sid.GetBinaryForm(sidBytes, 0);
+
+                // Создаем Trustee корректно через scope
+                var trusteeClass = new ManagementClass(scope, new ManagementPath("Win32_Trustee"), null);
+                var trustee = trusteeClass.CreateInstance();
+
+                trustee["SID"] = sidBytes;
+                trustee["Name"] = ntAccount.Value;
+
+                sd["Owner"] = trustee;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ошибка при установке владельца: {ex.Message}");
+            }
+        }
+
 
         private static ManagementScope GetManagementScope(string server, string username, SecureString password)
         {
@@ -67,13 +118,6 @@ namespace DFS_Provisioner.Services
             var scope = new ManagementScope($@"\\{server}\root\cimv2", options);
             scope.Connect();
             return scope;
-        }
-
-        private static void SetOwner(ManagementScope scope, string path)
-        {
-            var mo = new ManagementObject(scope,
-                new ManagementPath($"Win32_LogicalFileSecuritySetting.Path='{path}'"), null);
-            try { mo.InvokeMethod("TakeOwnership", null, null); } catch { }
         }
 
         private static void RemoveEveryone(ManagementBaseObject sd)
@@ -108,14 +152,13 @@ namespace DFS_Provisioner.Services
             }
         }
 
-        private static void AddAce(ManagementBaseObject sd, string sid, uint accessMask, uint aceFlags)
+        private static void AddAce(ManagementScope scope, ManagementBaseObject sd, string sid, uint accessMask, uint aceFlags)
         {
-            // Корректное создание через CreateInstance
-            var trusteeClass = new ManagementClass("Win32_Trustee");
+            var trusteeClass = new ManagementClass(scope, new ManagementPath("Win32_Trustee"), null);
             var trusteeObj = trusteeClass.CreateInstance();
             trusteeObj["SIDString"] = sid;
 
-            var aceClass = new ManagementClass("Win32_Ace");
+            var aceClass = new ManagementClass(scope, new ManagementPath("Win32_Ace"), null);
             var aceObj = aceClass.CreateInstance();
             aceObj["Trustee"] = trusteeObj;
             aceObj["AccessMask"] = accessMask;

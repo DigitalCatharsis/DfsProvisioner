@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="DFS Provisioner"
+        Title="DFS Provisioner 1.1 (Made by Alexander Marchenko)"
         Height="700" Width="950"
         WindowStartupLocation="CenterScreen"
         Background="#F0F0F0">

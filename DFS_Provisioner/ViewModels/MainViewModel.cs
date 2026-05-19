@@ -9,6 +9,10 @@ using DFS_Provisioner.Services;
 
 namespace DFS_Provisioner.ViewModels
 {
+    /// <summary>
+    /// Main ViewModel for the DFS Provisioner application.
+    /// Handles UI bindings, validation, configuration loading/saving, and execution of all provisioning steps.
+    /// </summary>
     public class MainViewModel : INotifyPropertyChanged, IDataErrorInfo
     {
         private string _configFilePath = "appsettings.json";
@@ -28,33 +32,54 @@ namespace DFS_Provisioner.ViewModels
         private string _writeGroupName;
         private string _dfsUsername;
 
+        /// <summary>Username for DFS operations (stored in config).</summary>
         public string DfsUsername { get => _dfsUsername; set { _dfsUsername = value; OnPropertyChanged(); } }
+        /// <summary>Password for DFS operations (not persisted).</summary>
         public SecureString DfsPassword { get; set; }
+        /// <summary>Path to the configuration JSON file.</summary>
         public string ConfigFilePath { get => _configFilePath; set { _configFilePath = value; OnPropertyChanged(); } }
+        /// <summary>Active Directory domain name.</summary>
         public string DomainName { get => _domainName; set { _domainName = value; OnPropertyChanged(); } }
+        /// <summary>AD user name (DOMAIN\username).</summary>
         public string AdUsername { get => _adUsername; set { _adUsername = value; OnPropertyChanged(); } }
+        /// <summary>File server user name (DOMAIN\username).</summary>
         public string ServerUsername { get => _serverUsername; set { _serverUsername = value; OnPropertyChanged(); } }
+        /// <summary>Target file server (single source of truth).</summary>
         public string ShareServer { get => _shareServer; set { _shareServer = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareUncPreview)); OnPropertyChanged(nameof(DfsTargetPreview)); } }
+        /// <summary>Distinguished name of the OU where AD groups will be created.</summary>
         public string GroupsOU { get => _groupsOU; set { _groupsOU = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewRead)); OnPropertyChanged(nameof(AdGroupPreviewWrite)); } }
+        /// <summary>Template for group description (use {ShareName} and {AccessType} placeholders).</summary>
         public string GroupDescriptionTemplate { get => _groupDescriptionTemplate; set { _groupDescriptionTemplate = value; OnPropertyChanged(); } }
+        /// <summary>Template for group notes (use {ShareName} and {Date} placeholders).</summary>
         public string GroupNotesTemplate { get => _groupNotesTemplate; set { _groupNotesTemplate = value; OnPropertyChanged(); } }
+        /// <summary>Full local path on the file server (e.g. E:\Shares\MyShare).</summary>
         public string LocalPath
         {
             get => _localPath;
             set { _localPath = value; OnPropertyChanged(); OnPropertyChanged(nameof(ShareFolderName)); OnPropertyChanged(nameof(ShareUncPreview)); OnPropertyChanged(nameof(DfsTargetPreview)); }
         }
+        /// <summary>Owner of the shared folder (DOMAIN\user).</summary>
         public string OwnerAccount { get => _ownerAccount; set { _ownerAccount = value; OnPropertyChanged(); } }
+        /// <summary>If true, the Everyone group will be removed from share permissions.</summary>
         public bool RemoveEveryoneFromShare { get => _removeEveryoneFromShare; set { _removeEveryoneFromShare = value; OnPropertyChanged(); } }
 
+        /// <summary>DFS namespace root (e.g. \\domain\root).</summary>
         public string NamespaceRoot { get => _namespaceRoot; set { _namespaceRoot = value; OnPropertyChanged(); OnPropertyChanged(nameof(DfsPathPreview)); } }
+        /// <summary>Template for the DFS link name (use {ShareName} placeholder).</summary>
         public string LinkNameTemplate { get => _linkNameTemplate; set { _linkNameTemplate = value; OnPropertyChanged(); OnPropertyChanged(nameof(DfsPathPreview)); } }
+        /// <summary>Name of the read-only AD group (editable, auto-generated if empty).</summary>
         public string ReadGroupName { get => _readGroupName; set { _readGroupName = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewRead)); } }
+        /// <summary>Name of the read-write AD group (editable, auto-generated if empty).</summary>
         public string WriteGroupName { get => _writeGroupName; set { _writeGroupName = value; OnPropertyChanged(); OnPropertyChanged(nameof(AdGroupPreviewWrite)); } }
 
+        /// <summary>AD password (not persisted).</summary>
         public SecureString AdPassword { get; set; }
+        /// <summary>File server password (not persisted).</summary>
         public SecureString ServerPassword { get; set; }
 
-        // Вычисляемые свойства для превью
+        // --- Computed preview properties ---
+
+        /// <summary>Extracts the share folder name from LocalPath.</summary>
         public string ShareFolderName
         {
             get
@@ -64,9 +89,12 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>UNC path to the share (preview).</summary>
         public string ShareUncPreview => $@"\\{ShareServer}\{ShareFolderName}";
+        /// <summary>DFS target path – identical to share UNC (preview).</summary>
         public string DfsTargetPreview => ShareUncPreview;
 
+        /// <summary>Full DFS folder path (preview).</summary>
         public string DfsPathPreview
         {
             get
@@ -78,12 +106,15 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>Preview of the read group's distinguished name in AD.</summary>
         public string AdGroupPreviewRead =>
             string.IsNullOrWhiteSpace(ReadGroupName) ? "" : $"CN={ReadGroupName},{GroupsOU?.TrimStart(',')}";
+        /// <summary>Preview of the write group's distinguished name in AD.</summary>
         public string AdGroupPreviewWrite =>
             string.IsNullOrWhiteSpace(WriteGroupName) ? "" : $"CN={WriteGroupName},{GroupsOU?.TrimStart(',')}";
 
-        // Валидация
+        // --- Validation ---
+        /// <summary>Validates the LocalPath property.</summary>
         public string this[string columnName]
         {
             get
@@ -101,7 +132,7 @@ namespace DFS_Provisioner.ViewModels
         }
         public string Error => null;
 
-        // Команды
+        // --- Commands ---
         public ICommand LoadConfigCommand { get; }
         public ICommand SaveConfigCommand { get; }
         public ICommand CheckAllCommand { get; }
@@ -111,6 +142,7 @@ namespace DFS_Provisioner.ViewModels
         public ICommand RunAllCommand { get; }
         public ICommand ClearLogCommand { get; }
 
+        /// <summary>Initializes a new instance of MainViewModel, wires commands and loads the default configuration.</summary>
         public MainViewModel()
         {
             LoadConfigCommand = new RelayCommand(LoadConfig);
@@ -125,6 +157,7 @@ namespace DFS_Provisioner.ViewModels
             AutoLoadConfig();
         }
 
+        /// <summary>Attempts to load the config file at startup.</summary>
         private void AutoLoadConfig()
         {
             try
@@ -140,6 +173,7 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>Opens a file dialog and loads the selected configuration file.</summary>
         private void LoadConfig()
         {
             var dlg = new Microsoft.Win32.OpenFileDialog { Filter = "JSON|*.json" };
@@ -156,6 +190,7 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>Saves the current UI state to a JSON configuration file.</summary>
         private void SaveConfig()
         {
             var config = new DefaultConfig
@@ -167,7 +202,6 @@ namespace DFS_Provisioner.ViewModels
                     Server = ShareServer,
                     DfsUsername = DfsUsername
                 },
-
                 ActiveDirectory = new ActiveDirectoryConfig
                 {
                     Domain = DomainName,
@@ -193,6 +227,7 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>Applies a loaded configuration object to the ViewModel properties.</summary>
         private void ApplyConfig(DefaultConfig config)
         {
             if (config == null) return;
@@ -230,6 +265,7 @@ namespace DFS_Provisioner.ViewModels
             }
         }
 
+        /// <summary>Performs all existence checks (server, AD groups, share, DFS).</summary>
         private async void CheckAll()
         {
             Log("=== Uniqueness check ===");
@@ -269,12 +305,12 @@ namespace DFS_Provisioner.ViewModels
                 var linkName = LinkNameTemplate.Replace("{ShareName}", ShareFolderName);
                 if (DfsService.DfsLinkExists(NamespaceRoot, linkName, DfsUsername, DfsPassword))
                     Log($"DFS link {linkName} exists.", true);
-                else
-                    Log($"DFS link {linkName} free.");
+                else Log($"DFS link {linkName} free.");
             }
             catch (Exception ex) { Log($"DFS check error: {ex.Message}", true); }
         }
 
+        /// <summary>Creates the read and write AD groups if they do not exist.</summary>
         private async void CreateGroups()
         {
             Log("=== Creating AD groups ===");
@@ -304,6 +340,7 @@ namespace DFS_Provisioner.ViewModels
             catch (Exception ex) { Log($"Error: {ex.Message}", true); }
         }
 
+        /// <summary>Creates the remote directory, share, configures share permissions and NTFS.</summary>
         private async void CreateShareAndNtfs()
         {
             Log("=== Share and NTFS ===");
@@ -330,18 +367,9 @@ namespace DFS_Provisioner.ViewModels
                                                  RemoveEveryoneFromShare, ServerUsername, ServerPassword);
                 Log("Share permissions applied.");
 
-                Thread.Sleep(2000); // небольшая пауза перед NTFS
+                Thread.Sleep(2000);
 
                 Log("Configuring NTFS permissions...");
-                NtfsService.SetNtfsPermissions(ShareServer, LocalPath, readGroupSid, writeGroupSid,
-                                               OwnerAccount, ServerUsername, ServerPassword);
-                Log("NTFS permissions applied.");
-
-                // Share permissions
-                ShareService.SetSharePermissions(ShareServer, ShareFolderName, readGroupSid, writeGroupSid,
-                                                 RemoveEveryoneFromShare, ServerUsername, ServerPassword);
-
-                // NTFS permissions
                 NtfsService.SetNtfsPermissions(ShareServer, LocalPath, readGroupSid, writeGroupSid,
                                                OwnerAccount, ServerUsername, ServerPassword);
                 Log("NTFS permissions applied.");
@@ -349,6 +377,7 @@ namespace DFS_Provisioner.ViewModels
             catch (Exception ex) { Log($"Share/NTFS error: {ex.Message}", true); }
         }
 
+        /// <summary>Creates the DFS link (and target if needed) using PowerShell.</summary>
         private async void SetupDfs()
         {
             Log("=== DFS ===");
@@ -368,6 +397,7 @@ namespace DFS_Provisioner.ViewModels
             catch (Exception ex) { Log($"DFS error: {ex.Message}", true); }
         }
 
+        /// <summary>Runs all provisioning steps sequentially.</summary>
         private async void RunAll()
         {
             CheckAll();
@@ -377,6 +407,7 @@ namespace DFS_Provisioner.ViewModels
             Log("=== All operations completed ===");
         }
 
+        /// <summary>Event raised when a log entry is appended. Parameter: message, isError.</summary>
         public event Action<string, bool> LogAppended;
         private void Log(string message, bool isError = false)
         {
@@ -384,6 +415,7 @@ namespace DFS_Provisioner.ViewModels
             LogAppended?.Invoke($"{DateTime.Now:T} {prefix}{message}", isError);
         }
 
+        /// <summary>Event raised to request clearing the log view.</summary>
         public event Action ClearLogRequested;
         private void ClearLog() => ClearLogRequested?.Invoke();
 

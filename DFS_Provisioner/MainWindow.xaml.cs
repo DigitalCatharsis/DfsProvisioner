@@ -5,6 +5,7 @@ using DFS_Provisioner.ViewModels;
 
 namespace DFS_Provisioner
 {
+    /// <summary>Main application window. Wires up ViewModel, password boxes, and colored logging.</summary>
     public partial class MainWindow : Window
     {
         private MainViewModel ViewModel => DataContext as MainViewModel;

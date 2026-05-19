@@ -1,18 +1,20 @@
-﻿using System;
-using System.Diagnostics;
-using System.Net;
+﻿using System.Diagnostics;
 using System.Security;
 using System.Text;
 
 namespace DFS_Provisioner.Services
 {
+    /// <summary>
+    /// Provides methods for checking and creating DFS links using PowerShell.
+    /// All operations are performed under a separate user context via StartInfo credentials.
+    /// </summary>
     public static class DfsService
     {
+        /// <summary>Checks whether a DFS link exists at the given namespace path.</summary>
         public static bool DfsLinkExists(string namespaceRoot, string linkName,
                                          string username, SecureString password)
         {
             string path = $@"{namespaceRoot}\{linkName}";
-            // Скрипт проверки: выводим EXISTS, если папка найдена
             string script = $@"
                 if (Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue) {{
                     Write-Output 'EXISTS'
@@ -24,12 +26,12 @@ namespace DFS_Provisioner.Services
             return output?.Contains("EXISTS") == true;
         }
 
+        /// <summary>Creates a DFS link (and adds the target if the link already exists) idempotently.</summary>
         public static void CreateDfsLink(string namespaceRoot, string linkName,
                                          string folderTargetPath, string description,
                                          string username, SecureString password)
         {
             string path = $@"{namespaceRoot}\{linkName}";
-            // Скрипт создания: идемпотентно создаёт ссылку и цель
             string script = $@"
                 $existing = Get-DfsnFolder -Path '{path}' -ErrorAction SilentlyContinue
                 if (-not $existing) {{
@@ -46,6 +48,7 @@ namespace DFS_Provisioner.Services
             RunPowerShell(script, username, password);
         }
 
+        /// <summary>Launches powershell.exe with the given script and credentials, returns stdout.</summary>
         private static string RunPowerShell(string script, string username, SecureString password)
         {
             var startInfo = new ProcessStartInfo
@@ -60,7 +63,6 @@ namespace DFS_Provisioner.Services
                 StandardErrorEncoding = Encoding.UTF8,
             };
 
-            // Разбираем DOMAIN\user
             if (!string.IsNullOrEmpty(username))
             {
                 var parts = username.Split('\\');
@@ -73,7 +75,7 @@ namespace DFS_Provisioner.Services
                 {
                     startInfo.UserName = username;
                 }
-                startInfo.Password = password.Copy(); // передаём SecureString без конвертации
+                startInfo.Password = password.Copy();
             }
 
             using (var process = new Process { StartInfo = startInfo })

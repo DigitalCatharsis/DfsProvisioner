@@ -1,13 +1,16 @@
-﻿using System;
-using System.Linq;
-using System.Management;
+﻿using System.Management;
 using System.Net;
 using System.Security;
 
 namespace DFS_Provisioner.Services
 {
+    /// <summary>
+    /// Provides methods for managing file shares on a remote server via WMI.
+    /// Includes checking existence, creation, permission setting, and remote directory creation.
+    /// </summary>
     public static class ShareService
     {
+        /// <summary>Tests connection to a server by opening a WMI scope.</summary>
         public static bool TestServerConnection(string server, string username, SecureString password)
         {
             try
@@ -19,6 +22,7 @@ namespace DFS_Provisioner.Services
             catch { return false; }
         }
 
+        /// <summary>Checks whether an SMB share with the given name exists on the server.</summary>
         public static bool ShareExists(string server, string shareName, string username, SecureString password)
         {
             try
@@ -33,6 +37,7 @@ namespace DFS_Provisioner.Services
             catch { return false; }
         }
 
+        /// <summary>Creates a new file share.</summary>
         public static void CreateShare(string server, string localPath, string shareName,
                                        string description, string username, SecureString password)
         {
@@ -41,7 +46,7 @@ namespace DFS_Provisioner.Services
             var inParams = mc.GetMethodParameters("Create");
             inParams["Path"] = localPath;
             inParams["Name"] = shareName;
-            inParams["Type"] = 0; // Disk Drive
+            inParams["Type"] = 0;
             inParams["Description"] = description;
 
             var outParams = mc.InvokeMethod("Create", inParams, null);
@@ -50,6 +55,7 @@ namespace DFS_Provisioner.Services
                 throw new Exception($"Share creation failed. Code: {returnValue}");
         }
 
+        /// <summary>Configures share-level permissions using Win32_LogicalShareSecuritySetting.</summary>
         public static void SetSharePermissions(string server, string shareName,
                                                string readGroupSid, string writeGroupSid,
                                                bool removeEveryone,
@@ -57,11 +63,9 @@ namespace DFS_Provisioner.Services
         {
             var scope = GetManagementScope(server, username, password);
 
-            // Класс Win32_LogicalShareSecuritySetting позволяет управлять разрешениями шары
             string objPath = $"Win32_LogicalShareSecuritySetting.Name=\"{shareName}\"";
             var securitySetting = new ManagementObject(scope, new ManagementPath(objPath), null);
 
-            // Получаем текущий дескриптор безопасности
             var outParams = securitySetting.InvokeMethod("GetSecurityDescriptor", null, null);
             if (outParams == null)
                 throw new Exception("GetSecurityDescriptor returned null.");
@@ -69,19 +73,15 @@ namespace DFS_Provisioner.Services
             if (sd == null)
                 throw new Exception("Security descriptor is null.");
 
-            // Удаляем Everyone (SID: S-1-1-0), если нужно
             if (removeEveryone)
                 RemoveEveryone(sd);
 
-            // Удаляем существующие ACE для наших групп, чтобы избежать дублирования
             RemoveAcesBySid(sd, readGroupSid);
             RemoveAcesBySid(sd, writeGroupSid);
 
-            // Добавляем новые ACE: Read для readGroupSid, Change для writeGroupSid
-            AddShareAce(sd, readGroupSid, 0x1200A9, 0); // READ
-            AddShareAce(sd, writeGroupSid, 0x1301BF, 0); // CHANGE
+            AddShareAce(sd, readGroupSid, 0x1200A9, 0);
+            AddShareAce(sd, writeGroupSid, 0x1301BF, 0);
 
-            // Применяем изменённый дескриптор
             var setParams = securitySetting.GetMethodParameters("SetSecurityDescriptor");
             setParams["Descriptor"] = sd;
             var result = securitySetting.InvokeMethod("SetSecurityDescriptor", setParams, null);
@@ -92,6 +92,7 @@ namespace DFS_Provisioner.Services
                 throw new Exception($"SetSecurityDescriptor failed with code {ret}");
         }
 
+        /// <summary>Creates a directory on the remote server via cmd.exe.</summary>
         public static void CreateRemoteDirectory(string server, string directoryPath, string username, SecureString password)
         {
             var scope = GetManagementScope(server, username, password);
@@ -101,7 +102,19 @@ namespace DFS_Provisioner.Services
             mc.InvokeMethod("Create", inParams, null);
         }
 
-        // Вспомогательные приватные методы
+        /// <summary>Creates a WMI scope for the specified server.</summary>
+        public static ManagementScope GetManagementScope(string server, string username, SecureString password)
+        {
+            var options = new ConnectionOptions
+            {
+                Username = username,
+                Password = ToPlainString(password),
+                Authentication = AuthenticationLevel.PacketPrivacy
+            };
+            var scope = new ManagementScope($@"\\{server}\root\cimv2", options);
+            scope.Connect();
+            return scope;
+        }
 
         private static void RemoveEveryone(ManagementBaseObject sd)
         {
@@ -133,39 +146,23 @@ namespace DFS_Provisioner.Services
 
         private static void AddShareAce(ManagementBaseObject sd, string sid, uint accessMask, uint flags)
         {
-            // Создаём корректный объект Trustee через CreateInstance
             var trusteeClass = new ManagementClass("Win32_Trustee");
             var trusteeObj = trusteeClass.CreateInstance();
             trusteeObj["SIDString"] = sid;
-            trusteeObj["Name"] = sid; // опционально
+            trusteeObj["Name"] = sid;
 
-            // Создаём корректный объект ACE
             var aceClass = new ManagementClass("Win32_Ace");
             var aceObj = aceClass.CreateInstance();
             aceObj["Trustee"] = trusteeObj;
             aceObj["AccessMask"] = accessMask;
             aceObj["AceFlags"] = flags;
-            aceObj["AceType"] = 0; // Allow
+            aceObj["AceType"] = 0;
 
-            // Добавляем ACE в массив DACL
             var dacl = sd["DACL"] as ManagementBaseObject[] ?? Array.Empty<ManagementBaseObject>();
             var newDacl = new ManagementBaseObject[dacl.Length + 1];
             Array.Copy(dacl, newDacl, dacl.Length);
             newDacl[^1] = aceObj;
             sd["DACL"] = newDacl;
-        }
-
-        public static ManagementScope GetManagementScope(string server, string username, SecureString password)
-        {
-            var options = new ConnectionOptions
-            {
-                Username = username,
-                Password = ToPlainString(password),
-                Authentication = AuthenticationLevel.PacketPrivacy
-            };
-            var scope = new ManagementScope($@"\\{server}\root\cimv2", options);
-            scope.Connect();
-            return scope;
         }
 
         private static string ToPlainString(SecureString secure)
