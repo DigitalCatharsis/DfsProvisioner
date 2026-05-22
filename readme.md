@@ -1,4 +1,5 @@
 # DFS Provisioner
+<img width="928" height="690" alt="image" src="https://github.com/user-attachments/assets/3f859a20-8c02-4bb1-b882-c82c65a30f6c" />
 
 **DFS Provisioner** - WPF-приложение для автоматизации создания SMB-шар, настройки NTFS-прав, групп Active Directory и DFS-ссылок. Программа позволяет выполнить все операции одной кнопкой или по шагам, используя настраиваемый JSON-конфиг.
 
